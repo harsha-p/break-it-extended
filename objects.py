@@ -44,6 +44,12 @@ class Brick(Object):
     def gettype(self):
         return self.__type
 
+    def movedown(self):
+        if display.get_move_down():
+            self.setx(self.getx() + 1)
+        if self.getx() >= Screen_height - brick_height - 4:
+            display.quit()
+
     def settype(self, brick_type):
         self.__type = brick_type
 
@@ -199,7 +205,7 @@ class Ball(Object):
                     # found brick
                     # need to update collision strategy, should not check full rectangle !!!
                     # change to something using ratio
-                    paddle.addscore(val)
+                    display.add_score(val)
                     self.__collided_brick_type = val
                     self.__collided_brick_x = x
                     self.__collided_brick_y = y
@@ -231,6 +237,9 @@ class Ball(Object):
                 elif Screen_height > x > 0 and Screen_width > y > 0:
                     try:
                         if display.grid[x][y] == PADDLE:
+                            # move bricks down
+                            for brick in bricks:
+                                brick.movedown()
                             # add variey of speed in y
                             mid = paddle.gety() + \
                                   int(paddle_sizes[paddle.gettype()] / 2)
@@ -252,8 +261,6 @@ class Ball(Object):
 class Paddle(Object):
     def __init__(self, x, y, type):
         self.__type = type
-        self.__lives = 3
-        self.__score = 0
         self.__onhold = []
         self.__paddlehold = False
         Object.__init__(self, x, y)
@@ -269,18 +276,6 @@ class Paddle(Object):
 
     def getpaddlehold(self):
         return self.__paddlehold
-
-    def addscore(self, add):
-        if add == 1:
-            self.__score += 10
-        elif add == 2:
-            self.__score += 15
-        elif add == 3:
-            self.__score += 20
-        # elif add == 4:
-
-    def getscore(self):
-        return self.__score
 
     def moveleft(self):
         if self.gety() - paddle_step >= 0:
@@ -308,9 +303,6 @@ class Paddle(Object):
                     ball.sety(ball.gety() + Screen_width - paddle_sizes[self.__type] - self.gety())
             self.sety(Screen_width - paddle_sizes[self.__type])
 
-    def getlives(self):
-        return self.__lives
-
     def release(self):
         self.__onhold[0].sethold(False)
         self.__onhold.pop(0)
@@ -323,18 +315,12 @@ class Paddle(Object):
         ball.sethold(True)
 
     def declives(self):
-        if self.__lives > 1:
-            self.__lives -= 1
-            while len(newpowerups):
-                newpowerups.pop()
-            for pow in powerups:
-                if pow.getstatus() == 1:
-                    pow.deactivate(self)
-        else:
-            pass
-            # os.system('tput reset')
-            # print("GAME OVER")
-            # quit()
+        display.declives()
+        while len(newpowerups):
+            newpowerups.pop()
+        for pow in powerups:
+            if pow.getstatus() == 1:
+                pow.deactivate(self)
 
 
 class Powerup(Object):
