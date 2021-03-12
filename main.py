@@ -16,7 +16,8 @@ while True:
     if time.time() - screen_time >= 0.1:
         display.create_screen()
         screen_time = time.time()
-        paddle.display(PADDLES[paddle.gettype()])
+        paddle.show()
+        # paddle.display([[paddle.getshape()]*paddle_sizes[paddle.gettype()]])
         print_details(time_played)
         if level_time >= 5:
             display.move_down(True)
@@ -29,6 +30,7 @@ while True:
             level_start = time.time()
             paddle = setnewlevel()
         checkpowerups()
+        checkbullets()
         for power in powerups:
             power.activate(paddle)
         for ball in BALLS:
@@ -45,6 +47,8 @@ while True:
             display.next_level()
             level_start = time.time()
             paddle = setnewlevel()
+        elif char == 's' or char == 'S':
+            paddle.shoot()
         elif char == ' ':
             if len(paddle.gethold()) > 0:
                 paddle.release()

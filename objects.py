@@ -54,6 +54,24 @@ class Brick(Object):
         self.__type = brick_type
 
     def checkcollision(self):
+        for laser in bullets:
+            type, x, y = laser.getbt()
+            if type == 0:
+                continue
+            if self.__type != type:
+                continue
+            if type == 4:
+                continue
+            bx = x - self.getx()
+            by = y - self.gety()
+            # if bx >= 0 and bx < brick_height and by >= 0 and by < brick_length:
+            if 0 <= bx < brick_height and 0 <= by < brick_length:
+                self.settype(type - 1)
+                return
+        if self.__rainbow and self.__type != 0:
+            self.__type = random.randint(1, 4)
+        # self.display(BRICKS[self.gettype()])
+
         for ball in BALLS:
             type, x, y = ball.getbt()
             if type == 0:
@@ -210,7 +228,7 @@ class Ball(Object):
                     self.__collided_brick_x = x
                     self.__collided_brick_y = y
                     if val == 1:
-                        newpower = Powerup(x, y, self.getxv(), self.getyv(), random.randint(1, 6))
+                        newpower = Powerup(x, y, self.getxv(), self.getyv(), random.randint(1, len(POWERUPS)))
                         newpowerups.append(newpower)
                     if self.__thru:
                         self.setx(self.getx() + self.getxv())
@@ -236,7 +254,7 @@ class Ball(Object):
                     return
                 elif Screen_height > x > 0 and Screen_width > y > 0:
                     try:
-                        if display.grid[x][y] == PADDLE:
+                        if display.grid[x][y] == paddle.getshape():
                             # move bricks down
                             for brick in bricks:
                                 brick.movedown()
@@ -262,20 +280,45 @@ class Paddle(Object):
     def __init__(self, x, y, type):
         self.__type = type
         self.__onhold = []
+        self.__shape = Back.WHITE + " " + Back.RESET
         self.__paddlehold = False
+        self.__laser = False  # change to false after implementig powerup
         Object.__init__(self, x, y)
 
     def settype(self, type):
         self.__type = type
 
+    def show(self):
+        self.display([[self.__shape] * paddle_sizes[self.__type]])
+
     def gettype(self):
         return self.__type
+
+    def setshape(self, shape):
+        self.__shape = shape
+
+    def getshape(self):
+        return self.__shape
+
+    def shoot(self):
+        if self.__laser != True:
+            return
+        b1 = Bullet(self.getx(), self.gety())
+        b2 = Bullet(self.getx(), self.gety() + paddle_sizes[self.__type])
+        bullets.append(b1)
+        bullets.append(b2)
 
     def setpaddlehold(self, paddlehold):
         self.__paddlehold = paddlehold
 
     def getpaddlehold(self):
         return self.__paddlehold
+
+    def setlaser(self, laser):
+        self.__laser = laser
+
+    def getlaser(self):
+        return self.__laser
 
     def moveleft(self):
         if self.gety() - paddle_step >= 0:
@@ -321,6 +364,42 @@ class Paddle(Object):
         for pow in powerups:
             if pow.getstatus() == 1:
                 pow.deactivate(self)
+
+
+class Bullet(Object):
+    def __init__(self, x, y):
+        self.__x_v = -1
+        self.__y_v = 0
+        self.__collided_brick_type = 0
+        self.__collided_brick_x = 0
+        self.__collided_brick_y = 0
+        Object.__init__(self, x, y)
+
+    def getbt(self):
+        return self.__collided_brick_type, self.__collided_brick_x, self.__collided_brick_y
+
+    def checkcollision(self):
+        i = self.getx() + self.__x_v
+        self.setx(i)
+        if self.__collided_brick_type != 0:
+            return True
+        j = self.gety()
+        if i <= 0:
+            return True
+        val = 0
+        try:
+            val = BRICKTYPES.index(display.grid[i][j])
+        except:
+            val = 0
+        if val > 0:
+            if val ==1:
+                newpower = Powerup(i, j, self.__x_v, self.__y_v, random.randint(1, len(POWERUPS)))
+                newpowerups.append(newpower)
+            display.add_score(val)
+            self.__collided_brick_type = val
+            self.__collided_brick_x = i
+            self.__collided_brick_y = j
+        self.display(BULLET)
 
 
 class Powerup(Object):
@@ -395,7 +474,7 @@ class Powerup(Object):
             for x in range(i, i + iv + dirx, dirx):
                 # check border
                 # print("XY",x,y)
-                if display.grid[x][y] == PADDLE:
+                if display.grid[x][y] == paddle.getshape():
                     self.activate(paddle)
                     return True
                 if x < 0:
@@ -435,7 +514,7 @@ class expandpaddle(Powerup):
     def activate(self, paddle):
         # not working (paddle at right border)
         if self.getstatus() == 1:
-            sz = paddle.gety() + len(PADDLES[2])
+            sz = paddle.gety() + paddle_sizes[2]
             if sz >= Screen_width:
                 paddle.sety(paddle.gety() + sz - Screen_width)
             paddle.settype(2)
@@ -553,6 +632,27 @@ class paddlegrab(Powerup):
     def activate(self, paddle):
         if self.getstatus() == 1:
             paddle.setpaddlehold(True)
+            if self.dectimer():
+                self.deactivate(paddle)
+        else:
+            self.deactivate(paddle)
+
+
+class shootpaddle(Powerup):
+
+    def __init__(self):
+        Powerup.__init__(self, 0, 0, 0, 0, 6)
+
+    def deactivate(self, paddle):
+        self.setstatus(0)
+        paddle.setshape(Back.WHITE + " " + Back.RESET)
+        paddle.setlaser(False)
+        self.setzero()
+
+    def activate(self, paddle):
+        if self.getstatus() == 1:
+            paddle.setshape(Back.RED + "|" + Back.RESET)
+            paddle.setlaser(True)
             if self.dectimer():
                 self.deactivate(paddle)
         else:

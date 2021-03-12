@@ -16,7 +16,8 @@ BRICK4 = Back.BLACK+"-"+Back.RESET
 BRICKTYPES = [BRICK0, BRICK1, BRICK2, BRICK3, BRICK4]
 PADDLE = Back.WHITE+" "+Style.RESET_ALL
 
-POWERUPS = [[["e"]], [["s"]], [["d"]], [["f"]], [["t"]], [["g"]]]
+POWERUPS = [[["e"]], [["s"]], [["d"]], [["f"]], [["t"]], [["g"]],[["S"]]]
+BULLET=[[Fore.RED+"✱"+Style.RESET_ALL]]
 
 BRICKS = [[[BRICK0]*brick_length]*brick_height, [[BRICK1]*brick_length]*brick_height,
           [[BRICK2]*brick_length]*brick_height, [[BRICK3]*brick_length]*brick_height, [[BRICK4]*brick_length]*brick_height]
@@ -30,3 +31,4 @@ BALLS = []
 bricks = []
 powerups = []
 newpowerups = []
+bullets = []
