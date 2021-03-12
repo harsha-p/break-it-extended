@@ -20,7 +20,8 @@ def create_objs():
         while y + brick_length <= Screen_width - 6:
             if random.randint(1, 100) <= 80:
                 if random.randint(1, 10) <= 9:
-                    bricks.append(Brick(x, y, random.randint(1, 3)))
+                    # bricks.append(Brick(x, y, random.randint(1, 3)))
+                    bricks.append(Brick(x, y, 1))
                 else:
                     bricks.append(Brick(x, y, 4))
             y += brick_length
