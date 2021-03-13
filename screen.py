@@ -9,8 +9,12 @@ class Screen:
         self.__rows = rows
         self.__columns = columns
         self.__movedown = False
+        # self.__level = 1
         self.__level = 1
+        self.__bricks=[]
         self.__lives = 3
+        self.__boss=None
+        self.__paddle=None
         self.__score = 0
         self.__change_level = False
         self.grid = []
@@ -28,6 +32,24 @@ class Screen:
 
     def get_move_down(self):
         return self.__movedown
+
+    def set_bricks(self, val):
+        self.__bricks = val
+
+    def get_bricks(self):
+        return self.__bricks
+
+    def set_boss(self, val):
+        self.__boss = val
+
+    def get_boss(self):
+        return self.__boss
+
+    def set_paddle(self, val):
+        self.__paddle = val
+
+    def get_paddle(self):
+        return self.__paddle
 
     def getlives(self):
         return self.__lives
@@ -55,6 +77,8 @@ class Screen:
             self.__score += 15
         elif add == 3:
             self.__score += 20
+        elif add == 0:
+            self.__score+=50
         # elif add == 4:
 
     def get_score(self):

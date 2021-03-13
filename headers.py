@@ -23,6 +23,7 @@ BRICKS = [[[BRICK0]*brick_length]*brick_height, [[BRICK1]*brick_length]*brick_he
           [[BRICK2]*brick_length]*brick_height, [[BRICK3]*brick_length]*brick_height, [[BRICK4]*brick_length]*brick_height]
 
 BALL = [[Back.BLACK+ Fore.BLUE+"✱"+Style.RESET_ALL]]
+UFOSHAPE = Back.WHITE+"X"+Style.RESET_ALL
 
 PADDLES = [[[PADDLE]*paddle_sizes[0]]*1,
            [[PADDLE]*paddle_sizes[1]]*1, [[PADDLE]*paddle_sizes[2]]*1]
@@ -32,3 +33,4 @@ bricks = []
 powerups = []
 newpowerups = []
 bullets = []
+boss_bullets = []
