@@ -1,6 +1,5 @@
-from objects import *
-from headers import *
-
+from paddle import *
+from ufo import *
 
 def check_powerups():
     i = 0
