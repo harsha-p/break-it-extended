@@ -1,5 +1,4 @@
 from objects import *
-from input import *
 from headers import *
 
 
@@ -71,12 +70,25 @@ def setnewlevel():
 def print_details(played_time):
     stat = str(" LIVES: " + str(display.getlives()) +
                "  |  SCORE:" + str(display.get_score()) + " | LEVEL: " + str(display.get_level()))
-    time_palyed = str(" | TIME: ") + str(played_time) + " | "
-    powerup_stat = "| "
+    time_played = str(" | TIME: ") + str(played_time) + " | "
+    power_stat = ""
+
     for pup in powerups:
-        powerup_stat += str(pup.name) + ": " + str(pup.gettimer() // 10) + str(" | ")
+        power_stat += str(pup.name) + ": " + str(pup.gettimer() // 10) + str(" | ")
+
     controls = str("LEFT : A | RIGHT : D | SHOOT: S | SKIP LEVEL : N | QUIT: Q ")
-    print(Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT + (stat + time_palyed + controls).center(
+
+    print(Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT + ("| " + stat + time_played + controls).center(
         Screen_width) + Style.RESET_ALL)
-    print(
-        Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT + powerup_stat.center(Screen_width) + Style.RESET_ALL)
+
+    if power_stat != "":
+        print(
+            Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT + power_stat.center(
+                Screen_width) + Style.RESET_ALL)
+
+    if display.get_boss():
+        history_bar = str(Back.GREEN + " " * (Screen_width // 10) * display.get_boss().getlives() + Back.WHITE + " " * (
+                    Screen_width // 10) * (10 - display.get_boss().getlives()) + Back.LIGHTRED_EX)
+
+        print(Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT + history_bar.center(
+            Screen_width) + Style.RESET_ALL)

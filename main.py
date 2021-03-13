@@ -1,5 +1,6 @@
 import time
 from functions import *
+from input import *
 from screen import display
 
 start_time = time.time()
