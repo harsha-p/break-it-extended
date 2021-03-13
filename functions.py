@@ -11,6 +11,7 @@ def checkpowerups():
         else:
             i += 1
 
+
 def checkbullets():
     i = 0
     while i < len(bullets):
@@ -18,6 +19,7 @@ def checkbullets():
             bullets.pop(i)
         else:
             i += 1
+
 
 def setnewlevel():
     x = 4
@@ -39,7 +41,7 @@ def setnewlevel():
                 y += brick_length
             x += brick_height
     else:
-        #need to add boss level
+        # need to add boss level
         pass
     yp = random.randint(0, Screen_width - paddle_sizes[1])
     yb = random.randint(yp, yp + paddle_sizes[1])
@@ -61,11 +63,12 @@ paddle = setnewlevel()
 
 
 def print_details(played_time):
-    stat1 = str("  LIVES: " + str(display.getlives()) +
-                "  |  SCORE:" + str(display.get_score()) + " | LEVEL: " + str(display.get_level()))
-    stat2 = str("TIME: " + str(played_time))
-    stat3 = str("LEFT : A | RIGHT : D | SHOOT: S | SKIP LEVEL : N | QUIT: Q ")
-    lol = Screen_width / 3
-    lol = int(lol)
-    print(Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT +
-          stat1.ljust(lol) + stat2.center(lol) + stat3.rjust(lol) + Style.RESET_ALL)
+    stat = str(" LIVES: " + str(display.getlives()) +
+               "  |  SCORE:" + str(display.get_score()) + " | LEVEL: " + str(display.get_level()))
+    time_palyed = str(" | TIME: ") + str(played_time)+" | "
+    powerup_stat = "| "
+    for pup in powerups:
+        powerup_stat += str(pup.name) + ": " + str(pup.gettimer() // 10) + str(" | ")
+    controls= str("LEFT : A | RIGHT : D | SHOOT: S | SKIP LEVEL : N | QUIT: Q ")
+    print(Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT +( stat +time_palyed+ controls).center(Screen_width) + Style.RESET_ALL)
+    print(Fore.WHITE + Back.LIGHTRED_EX + Fore.BLACK + Style.BRIGHT + powerup_stat.center(Screen_width) + Style.RESET_ALL)

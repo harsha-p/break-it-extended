@@ -38,6 +38,7 @@ class Brick(Object):
 
     def __init__(self, x, y, brick_type):
         self.__type = brick_type
+        self.__count = 0
         self.__rainbow = random.randint(0, 10) < 1
         Object.__init__(self, x, y)
 
@@ -68,9 +69,11 @@ class Brick(Object):
             if 0 <= bx < brick_height and 0 <= by < brick_length:
                 self.settype(type - 1)
                 return
-        if self.__rainbow and self.__type != 0:
-            self.__type = random.randint(1, 4)
-        # self.display(BRICKS[self.gettype()])
+        if self.__rainbow:
+            self.__count += 1
+        if self.__count == 10 and self.__type != 0:
+            self.__type = random.randint(1, 3)
+            self.__count = 0
 
         for ball in BALLS:
             type, x, y = ball.getbt()
@@ -89,8 +92,6 @@ class Brick(Object):
                 else:
                     self.settype(type - 1)
                 return
-        if self.__rainbow and self.__type != 0:
-            self.__type = random.randint(1, 4)
         self.display(BRICKS[self.gettype()])
 
 
@@ -392,7 +393,7 @@ class Bullet(Object):
         except:
             val = 0
         if val > 0:
-            if val ==1:
+            if val == 1:
                 newpower = Powerup(i, j, self.__x_v, self.__y_v, random.randint(1, len(POWERUPS)))
                 newpowerups.append(newpower)
             display.add_score(val)
@@ -403,12 +404,13 @@ class Bullet(Object):
 
 
 class Powerup(Object):
-    def __init__(self, x, y, xv, yv, type):
+    def __init__(self, x, y, xv, yv, type, name="powerup"):
         self.__timer = 0
         self.__status = 0
         self.__gravity = xv
         self.__xv = 0
         self.__yv = yv
+        self.name = name
         self.__type = type
         Object.__init__(self, x, y)
 
@@ -422,7 +424,7 @@ class Powerup(Object):
         self.__status = status
 
     def addtimer(self):
-        self.__timer += 50
+        self.__timer += 100
 
     def setzero(self):
         self.__timer = 0
@@ -444,7 +446,7 @@ class Powerup(Object):
     def activate(self, paddle):
         type = self.gettype()
         # print("TYPE",type,self.getx(),self.gety())
-        # print(len(powerups),type)
+        # print(printapowerups),type)
         pow = powerups[type - 1]
         if pow.getstatus() == 0:
             pow.setstatus(1)
@@ -504,7 +506,7 @@ class Powerup(Object):
 class expandpaddle(Powerup):
 
     def __init__(self):
-        Powerup.__init__(self, 0, 0, 0, 0, 0)
+        Powerup.__init__(self, 0, 0, 0, 0, 0, "EXP")
 
     def deactivate(self, paddle):
         self.setstatus(0)
@@ -525,7 +527,7 @@ class expandpaddle(Powerup):
 class shrinkpaddle(Powerup):
 
     def __init__(self):
-        Powerup.__init__(self, 0, 0, 0, 0, 1)
+        Powerup.__init__(self, 0, 0, 0, 0, 1, "SHR")
 
     def deactivate(self, paddle):
         self.setstatus(0)
@@ -542,7 +544,7 @@ class shrinkpaddle(Powerup):
 class doubletrouble(Powerup):
 
     def __init__(self):
-        Powerup.__init__(self, 0, 0, 0, 0, 2)
+        Powerup.__init__(self, 0, 0, 0, 0, 2, "DTR")
 
     def deactivate(self, paddle):
         # print("LOLOL")
@@ -574,7 +576,7 @@ class fastball(Powerup):
 
     def __init__(self):
         self.lol = 0
-        Powerup.__init__(self, 0, 0, 0, 0, 3)
+        Powerup.__init__(self, 0, 0, 0, 0, 3, "FSB")
 
     def deactivate(self, paddle):
         # pass
@@ -600,7 +602,7 @@ class fastball(Powerup):
 class thruball(Powerup):
 
     def __init__(self):
-        Powerup.__init__(self, 0, 0, 0, 0, 4)
+        Powerup.__init__(self, 0, 0, 0, 0, 4, "THB")
 
     def deactivate(self, paddle):
         self.setstatus(0)
@@ -622,7 +624,7 @@ class thruball(Powerup):
 class paddlegrab(Powerup):
 
     def __init__(self):
-        Powerup.__init__(self, 0, 0, 0, 0, 5)
+        Powerup.__init__(self, 0, 0, 0, 0, 5, "GRB")
 
     def deactivate(self, paddle):
         self.setstatus(0)
@@ -641,12 +643,12 @@ class paddlegrab(Powerup):
 class shootpaddle(Powerup):
 
     def __init__(self):
-        Powerup.__init__(self, 0, 0, 0, 0, 6)
+        Powerup.__init__(self, 0, 0, 0, 0, 6, "SHB")
 
     def deactivate(self, paddle):
         self.setstatus(0)
         paddle.setshape(Back.WHITE + " " + Back.RESET)
-        paddle.setlaser(False)
+        # paddle.setlaser(False)
         self.setzero()
 
     def activate(self, paddle):
