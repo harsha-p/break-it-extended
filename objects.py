@@ -38,22 +38,22 @@ class Brick(Object):
     def __init__(self, x, y, brick_type):
         self.__type = brick_type
         self.__count = 0
-        self.__rainbow = display.get_level()>0  and random.randint(0, 10) < 1
+        self.__rainbow = display.get_level() > 0 and random.randint(0, 10) < 1
         Object.__init__(self, x, y)
 
     def gettype(self):
         return self.__type
 
-    def movedown(self):
-        if display.get_move_down() and display.get_level()!=0:
+    def move_down(self):
+        if display.get_move_down() and display.get_level() != 0:
             self.setx(self.getx() + 1)
         if self.getx() >= Screen_height - brick_height - 4:
             display.quit()
 
-    def settype(self, brick_type):
+    def set_type(self, brick_type):
         self.__type = brick_type
 
-    def checkcollision(self):
+    def check_collision(self):
         for laser in bullets:
             type, x, y = laser.getbt()
             if type == 0:
@@ -66,7 +66,7 @@ class Brick(Object):
             by = y - self.gety()
             # if bx >= 0 and bx < brick_height and by >= 0 and by < brick_length:
             if 0 <= bx < brick_height and 0 <= by < brick_length:
-                self.settype(type - 1)
+                self.set_type(type - 1)
                 return
         if self.__rainbow:
             self.__count += 1
@@ -87,9 +87,9 @@ class Brick(Object):
             # if bx >= 0 and bx < brick_height and by >= 0 and by < brick_length:
             if 0 <= bx < brick_height and 0 <= by < brick_length:
                 if ball.getthru():
-                    self.settype(0)
+                    self.set_type(0)
                 else:
-                    self.settype(type - 1)
+                    self.set_type(type - 1)
                 return
         self.display(BRICKS[self.gettype()])
 
@@ -101,7 +101,7 @@ class Ball(Object):
         self.__collided_brick_type = 0
         self.__collided_brick_x = 0
         self.__collided_brick_y = 0
-        self.__onhold = False
+        self.__on_hold = False
         self.__thru = False
         Object.__init__(self, x, y)
 
@@ -120,16 +120,16 @@ class Ball(Object):
     def getbt(self):
         return self.__collided_brick_type, self.__collided_brick_x, self.__collided_brick_y
 
-    def sethold(self, value):
-        self.__onhold = value
+    def set_hold(self, value):
+        self.__on_hold = value
 
-    def gethold(self):
-        return self.__onhold
+    def get_hold(self):
+        return self.__on_hold
 
     def setyv(self, y_velocity):
         self.__y_v = y_velocity
 
-    def incspeed(self):
+    def inc_speed(self):
         y = self.getyv()
         x = self.getxv()
         if y > 0:
@@ -141,7 +141,7 @@ class Ball(Object):
         else:
             self.setxv(x - 2)
 
-    def decspeed(self):
+    def dec_speed(self):
         y = self.getyv()
         x = self.getxv()
         if y > 0:
@@ -156,18 +156,19 @@ class Ball(Object):
     def getyv(self):
         return self.__y_v
 
-    def create_newball(self, paddle):
+    def create_newball(self):
+        paddle = display.get_paddle()
         yp = paddle.gety()
         yb = random.randint(yp, yp + paddle_sizes[paddle.gettype()])
         # ball = Ball(Screen_height-5, yb, -1, 1)
         ball = Ball(Screen_height - 5, yb, -1, 1)
-        paddle.sethold(ball)
+        paddle.set_hold(ball)
         BALLS.append(ball)
         # BALLS.remove(self)
         return
 
-    def checkcollision(self):
-        if self.__onhold:
+    def check_collision(self):
+        if self.__on_hold:
             self.display(BALL)
             return
         diry = 0
@@ -200,8 +201,8 @@ class Ball(Object):
                     self.setxv(-self.getxv())
                     BALLS.remove(self)
                     if len(BALLS) == 0:
-                        paddle.declives()
-                        self.create_newball(paddle)
+                        paddle.dec_lives()
+                        self.create_newball()
                     check = True
                 if y < 0:
                     self.setyv(-self.getyv())
@@ -217,7 +218,7 @@ class Ball(Object):
                 # check brick
                 val = 0
                 try:
-                    val = BRICKTYPES.index(display.grid[x][y])
+                    val = brick_types.index(display.grid[x][y])
                 except:
                     val = 0
                 if val > 0:
@@ -228,9 +229,9 @@ class Ball(Object):
                     self.__collided_brick_type = val
                     self.__collided_brick_x = x
                     self.__collided_brick_y = y
-                    if val == 1 and display.get_level()!=0:
-                        newpower = Powerup(x, y, self.getxv(), self.getyv(), random.randint(1, len(POWERUPS)))
-                        newpowerups.append(newpower)
+                    if (val == 1 or self.__thru) and display.get_level() != 0:
+                        new_power = Powerup(x, y, self.getxv(), self.getyv(), random.randint(1, len(POWERUPS)))
+                        new_powerups.append(new_power)
                     if self.__thru:
                         self.setx(self.getx() + self.getxv())
                         self.sety(self.gety() + self.getyv())
@@ -255,24 +256,23 @@ class Ball(Object):
                     return
                 elif Screen_height > x > 0 and Screen_width > y > 0:
                     try:
-                        if display.grid[x][y] == paddle.getshape():
+                        if display.grid[x][y] == paddle.get_shape():
                             # move bricks down
                             for brick in bricks:
-                                brick.movedown()
+                                brick.move_down()
                             # add variey of speed in y
-                            mid = paddle.gety() + \
-                                  int(paddle_sizes[paddle.gettype()] / 2)
+                            mid = paddle.gety() + int(paddle_sizes[paddle.gettype()] / 2)
                             self.sety(y)
                             self.setx(x - dirx)
                             self.setxv(-self.getxv())
                             self.setyv(self.getyv() + y - mid)
-                            if paddle.getpaddlehold():
-                                paddle.sethold(self)
+                            if paddle.get_paddle_hold():
+                                paddle.set_hold(self)
                             self.display(BALL)
                             return
                     except:
                         pass
-                    if display.grid[x][y]==UFOSHAPE:
+                    if display.grid[x][y] == ufo_shape:
                         display.add_score(0)
                         posy = diry * (y - self.gety())
                         posx = dirx * (x - self.getx())
@@ -290,7 +290,7 @@ class Ball(Object):
                             self.sety(y - diry)
                             self.setx(x)
                         self.display(BALL)
-                        display.get_boss().declives()
+                        display.get_boss().dec_lives()
                         return
         self.setx(self.getx() + self.getxv())
         self.sety(self.gety() + self.getyv())
@@ -300,13 +300,14 @@ class Ball(Object):
 class Paddle(Object):
     def __init__(self, x, y, type):
         self.__type = type
-        self.__onhold = []
+        self.__lives = 3
+        self.__on_hold = []
         self.__shape = Back.WHITE + " " + Back.RESET
-        self.__paddlehold = False
-        self.__laser = False  # change to false after implementig powerup
+        self.__paddle_hold = False
+        self.__laser = False
         Object.__init__(self, x, y)
 
-    def settype(self, type):
+    def set_type(self, type):
         self.__type = type
 
     def show(self):
@@ -318,127 +319,129 @@ class Paddle(Object):
     def setshape(self, shape):
         self.__shape = shape
 
-    def getshape(self):
+    def get_shape(self):
         return self.__shape
 
     def shoot(self):
-        if self.__laser != True:
+        if not self.__laser:
             return
         b1 = Bullet(self.getx(), self.gety())
         b2 = Bullet(self.getx(), self.gety() + paddle_sizes[self.__type])
         bullets.append(b1)
         bullets.append(b2)
 
-    def setpaddlehold(self, paddlehold):
-        self.__paddlehold = paddlehold
+    def set_paddle_hold(self, paddle_hold):
+        self.__paddle_hold = paddle_hold
 
-    def getpaddlehold(self):
-        return self.__paddlehold
+    def get_paddle_hold(self):
+        return self.__paddle_hold
 
-    def setlaser(self, laser):
+    def set_laser(self, laser):
         self.__laser = laser
 
-    def getlaser(self):
+    def get_laser(self):
         return self.__laser
 
-    def moveleft(self):
+    def move_left(self):
         if self.gety() - paddle_step >= 0:
             self.sety(self.gety() - paddle_step)
             try:
-                for ball in self.__onhold:
+                for ball in self.__on_hold:
                     ball.sety(ball.gety() - paddle_step)
             except:
-                print(self.__onhold)
+                print(self.__on_hold)
                 quit()
         else:
-            for ball in self.__onhold:
+            for ball in self.__on_hold:
                 if ball.gety() != 0:
                     ball.sety(ball.gety() - self.gety())
             self.sety(0)
-        if display.get_level()==0:
+        if display.get_level() == 0:
             display.get_boss().move(self.gety())
 
-    def moveright(self):
+    def move_right(self):
         if self.gety() + paddle_sizes[self.__type] + paddle_step <= Screen_width:
             self.sety(self.gety() + paddle_step)
-            for ball in self.__onhold:
+            for ball in self.__on_hold:
                 ball.sety(ball.gety() + paddle_step)
         else:
-            for ball in self.__onhold:
+            for ball in self.__on_hold:
                 if self.gety() != (Screen_width - paddle_sizes[self.__type]):
                     ball.sety(ball.gety() + Screen_width - paddle_sizes[self.__type] - self.gety())
             self.sety(Screen_width - paddle_sizes[self.__type])
-        if display.get_level()==0:
+        if display.get_level() == 0:
             display.get_boss().move(self.gety())
 
     def release(self):
-        self.__onhold[0].sethold(False)
-        self.__onhold.pop(0)
+        self.__on_hold[0].set_hold(False)
+        self.__on_hold.pop(0)
 
-    def gethold(self):
-        return self.__onhold
+    def get_hold(self):
+        return self.__on_hold
 
-    def sethold(self, ball):
-        self.__onhold.append(ball)
-        ball.sethold(True)
+    def set_hold(self, ball):
+        self.__on_hold.append(ball)
+        ball.set_hold(True)
 
-    def declives(self):
-        display.declives()
-        while len(newpowerups):
-            newpowerups.pop()
-        for pow in powerups:
-            if pow.getstatus() == 1:
-                pow.deactivate()
+    def get_lives(self):
+        return self.__lives
+
+    def dec_lives(self):
+        self.__lives -= 1
+        while len(new_powerups):
+            new_powerups.pop()
+        for power in powerups:
+            if power.getstatus() == 1:
+                power.deactivate()
+        if self.__lives == 0:
+            display.quit()
 
 
 class Ufo(Object):
     def __init__(self, y):
-        self.__shape = [[UFOSHAPE] * paddle_sizes[1]]
+        self.__shape = [[ufo_shape] * paddle_sizes[1]]
         self.__lives = 10
-        self.__count=0
-        # self.__shape = [[UFOSHAPE] * random.randint(2, 5)] * 3
-        # print(self.__shape)
+        self.__count = 0
         Object.__init__(self, 4, y)
 
     def show(self):
-        self.__count+=1
-        if self.__count==20:
+        self.__count += 1
+        if self.__count == 20:
             self.shoot()
-            self.__count=0
-        # print("LOLOLOL")
+            self.__count = 0
         self.display(self.__shape)
 
     def shoot(self):
-        b1 = Bullet(self.getx(), self.gety() + len(self.__shape[-1]) // 2, 1,boss=True)
+        b1 = Bullet(self.getx(), self.gety() + len(self.__shape[-1]) // 2, 1, boss=True)
         bullets.append(b1)
 
     def move(self, y):
         self.sety(y)
 
     def spawn(self):
-        x=self.__lives*2
+        x = self.__lives * 2
         y = 0
-        while y + brick_length <= Screen_width - 6:
-            bricks.append(Brick(x, y, random.randint(1,3)))
+        while y + brick_length <= Screen_width:
+            bricks.append(Brick(x, y, random.randint(1, 3)))
             y += brick_length
 
-    def getlives(self):
+    def get_lives(self):
         return self.__lives
 
-    def declives(self):
-        self.__lives-=1
-        if self.__lives == 4 or self.__lives==7:
-            # spawn bricks after some decrese twice
+    def dec_lives(self):
+        self.__lives -= 1
+        if self.__lives == 4 or self.__lives == 7:
             self.spawn()
             pass
-        if self.__lives==0:
+        if self.__lives == 0:
             display.quit()
 
+
 class Bullet(Object):
-    def __init__(self, x, y, x_v=-1,boss=False):
+    def __init__(self, x, y, x_v=-1, boss=False):
         self.__x_v = x_v
         self.__y_v = 0
-        self.__boss=boss
+        self.__boss = boss
         self.__collided_brick_type = 0
         self.__collided_brick_x = 0
         self.__collided_brick_y = 0
@@ -447,18 +450,15 @@ class Bullet(Object):
     def getbt(self):
         return self.__collided_brick_type, self.__collided_brick_x, self.__collided_brick_y
 
-    def getboss(self):
-        return self.__boss
-
-    def checkcollision(self):
+    def check_collision(self):
         if self.__boss:
             i = self.getx() + self.__x_v
             self.setx(i)
             j = self.gety()
-            if i >= Screen_height-1:
+            if i >= Screen_height - 1:
                 return True
-            if display.grid[i][j]== display.get_paddle().getshape():
-                display.get_paddle().declives()
+            if display.grid[i][j] == display.get_paddle().get_shape():
+                display.get_paddle().dec_lives()
                 return True
             self.display(BULLET)
             return
@@ -472,13 +472,13 @@ class Bullet(Object):
                 return True
             val = 0
             try:
-                val = BRICKTYPES.index(display.grid[i][j])
+                val = brick_types.index(display.grid[i][j])
             except:
                 val = 0
             if val > 0:
                 if val == 1:
                     newpower = Powerup(i, j, self.__x_v, self.__y_v, random.randint(1, len(POWERUPS)))
-                    newpowerups.append(newpower)
+                    new_powerups.append(newpower)
                 display.add_score(val)
                 self.__collided_brick_type = val
                 self.__collided_brick_x = i
@@ -554,13 +554,13 @@ class Powerup(Object):
             dirx = -1
         else:
             dirx = 1
-        paddle =display.get_paddle()
+        paddle = display.get_paddle()
         # print(j,jv,diry,i,iv,dirx)
         for y in range(j, j + jv + diry, diry):
             for x in range(i, i + iv + dirx, dirx):
                 # check border
                 # print("XY",x,y)
-                if display.grid[x][y] == paddle.getshape():
+                if display.grid[x][y] == paddle.get_shape():
                     self.activate()
                     return True
                 if x < 0:
@@ -595,7 +595,7 @@ class expandpaddle(Powerup):
     def deactivate(self):
         self.setstatus(0)
         self.setzero()
-        display.get_paddle().settype(1)
+        display.get_paddle().set_type(1)
 
     def activate(self):
         paddle = display.get_paddle()
@@ -604,12 +604,12 @@ class expandpaddle(Powerup):
             sz = paddle.gety() + paddle_sizes[2]
             if sz >= Screen_width:
                 paddle.sety(paddle.gety() + sz - Screen_width)
-            paddle.settype(2)
+            paddle.set_type(2)
             if self.dectimer():
                 self.deactivate()
 
 
-class shrinkpaddle(Powerup):
+class ShrinkPaddle(Powerup):
 
     def __init__(self):
         Powerup.__init__(self, 0, 0, 0, 0, 1, "SHR")
@@ -617,21 +617,21 @@ class shrinkpaddle(Powerup):
     def deactivate(self):
         self.setstatus(0)
         self.setzero()
-        display.get_paddle().settype(1)
+        display.get_paddle().set_type(1)
 
     def activate(self):
         if self.getstatus() == 1:
-            display.get_paddle().settype(0)
+            display.get_paddle().set_type(0)
             if self.dectimer():
                 self.deactivate()
 
 
-class doubletrouble(Powerup):
+class DoubleTrouble(Powerup):
 
     def __init__(self):
         Powerup.__init__(self, 0, 0, 0, 0, 2, "DTR")
 
-    def deactivate(self ):
+    def deactivate(self):
         # print("LOLOL")
         self.setstatus(0)
         # print(len(BALLS),"BALLS")
@@ -657,7 +657,7 @@ class doubletrouble(Powerup):
             self.deactivate()
 
 
-class fastball(Powerup):
+class FastBall(Powerup):
 
     def __init__(self):
         self.lol = 0
@@ -668,7 +668,7 @@ class fastball(Powerup):
         self.setstatus(0)
         self.lol = 0
         for ball in BALLS:
-            ball.decspeed()
+            ball.dec_speed()
         self.setzero()
 
     def activate(self):
@@ -676,7 +676,7 @@ class fastball(Powerup):
             if self.lol == 0:
                 self.lol = 1
                 for ball in BALLS:
-                    ball.incspeed()
+                    ball.inc_speed()
             if self.dectimer():
                 self.deactivate()
             # print("TIMER", self.gettimer())
@@ -684,7 +684,7 @@ class fastball(Powerup):
         #     self.deactivate()
 
 
-class thruball(Powerup):
+class ThruBall(Powerup):
 
     def __init__(self):
         Powerup.__init__(self, 0, 0, 0, 0, 4, "THB")
@@ -706,26 +706,26 @@ class thruball(Powerup):
             self.deactivate()
 
 
-class paddlegrab(Powerup):
+class PaddleGrab(Powerup):
 
     def __init__(self):
         Powerup.__init__(self, 0, 0, 0, 0, 5, "GRB")
 
     def deactivate(self):
         self.setstatus(0)
-        display.get_paddle().setpaddlehold(False)
+        display.get_paddle().set_paddle_hold(False)
         self.setzero()
 
     def activate(self):
         if self.getstatus() == 1:
-            display.get_paddle().setpaddlehold(True)
+            display.get_paddle().set_paddle_hold(True)
             if self.dectimer():
                 self.deactivate()
         else:
             self.deactivate()
 
 
-class shootpaddle(Powerup):
+class ShootPaddle(Powerup):
 
     def __init__(self):
         Powerup.__init__(self, 0, 0, 0, 0, 6, "SHB")
@@ -740,7 +740,7 @@ class shootpaddle(Powerup):
         if self.getstatus() == 1:
             paddle = display.get_paddle()
             paddle.setshape(Back.RED + "|" + Back.RESET)
-            paddle.setlaser(True)
+            paddle.set_laser(True)
             if self.dectimer():
                 self.deactivate()
         else:
