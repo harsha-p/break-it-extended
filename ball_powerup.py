@@ -258,7 +258,7 @@ class Powerup(Object):
     def check(self):
         x = self.getx()
         y = self.gety()
-        self.__gravity += 0.1
+        self.__gravity += 0.2
         self.__xv = math.floor(self.__gravity)
         diry = 0
         jv = self.__yv
@@ -452,6 +452,7 @@ class ShootPaddle(Powerup):
 
     def deactivate(self):
         self.setstatus(0)
+        display.get_paddle().set_laser(False)
         display.get_paddle().setshape(Back.WHITE + " " + Back.RESET)
         # paddle.setlaser(False)
         self.setzero()

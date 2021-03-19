@@ -36,12 +36,8 @@ class Brick(Object):
             # if bx >= 0 and bx < brick_height and by >= 0 and by < brick_length:
             if 0 <= bx < brick_height and 0 <= by < brick_length:
                 self.set_type(type - 1)
+                self.__rainbow = False
                 return
-        if self.__rainbow:
-            self.__count += 1
-        if self.__count == 10 and self.__type != 0:
-            self.__type = random.randint(1, 3)
-            self.__count = 0
 
         for ball in BALLS:
             type, x, y = ball.getbt()
@@ -59,5 +55,11 @@ class Brick(Object):
                     self.set_type(0)
                 else:
                     self.set_type(type - 1)
+                self.__rainbow = False
                 return
+        if self.__rainbow:
+            self.__count += 1
+        if self.__count == 5 and self.__type != 0:
+            self.__type = random.randint(1, 3)
+            self.__count = 0
         self.display(BRICKS[self.gettype()])

@@ -15,7 +15,8 @@ This game is a terminal version of DX-Ball.
 
 **n** - To skip level
 
-**s** - To shoot bullet
+[comment]: <> (**s** - To shoot bullet)
+**.** - To drop bombs from Boss
 
 **q** - To quit
 

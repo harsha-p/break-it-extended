@@ -42,25 +42,29 @@ while True:
         for ball in BALLS:
             ball.check_collision()
 
-        char = input_to(Get())
-        if char == 'q' or char == 'Q':
-            display.quit()
-        elif char == 'd' or char == 'D':
-            paddle.move_right()
-        elif char == 'a' or char == 'A':
-            paddle.move_left()
-        elif char == 'n' or char == 'N':
-            display.next_level()
-            level_start = time.time()
-            paddle = setnewlevel()
-        elif char == '.':
-            if boss:
-                boss.shoot()
-        elif char == 's' or char == 'S':
-            if time.time() - shoot_interval >= 0.5:
-                shoot_interval = time.time()
-                paddle.shoot()
-        elif char == ' ':
-            if len(paddle.get_hold()) > 0:
-                paddle.release()
+        if time.time() - shoot_interval >= 1:
+            shoot_interval = time.time()
+            paddle.shoot()
         display.print_screen()
+
+    char = input_to(Get())
+    if char == 'q' or char == 'Q':
+        display.quit()
+    elif char == 'd' or char == 'D':
+        paddle.move_right()
+    elif char == 'a' or char == 'A':
+        paddle.move_left()
+    elif char == 'n' or char == 'N':
+        display.next_level()
+        level_start = time.time()
+        paddle = setnewlevel()
+    elif char == '.':
+        if boss:
+            boss.shoot()
+    # elif char == 's' or char == 'S':
+    #     if time.time() - shoot_interval >= 0.5:
+    #         shoot_interval = time.time()
+    #         paddle.shoot()
+    elif char == ' ':
+        if len(paddle.get_hold()) > 0:
+            paddle.release()
